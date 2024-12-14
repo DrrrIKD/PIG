@@ -16,7 +16,7 @@ jobs:
             sudo apt-get install -y git unzip openjdk-11-jdk curl \
               libssl-dev libffi-dev zlib1g-dev \
               libncurses5-dev libgdbm-dev libc6-dev \
-              libsqlite3-dev libreadline-dev libbz2-dev expect
+              libsqlite3-dev libreadline-dev libbz2-dev
             pip install --upgrade pip
             pip install buildozer cython==0.29.36
 
@@ -36,16 +36,29 @@ jobs:
               "platform-tools" \
               "build-tools;33.0.0" \
               "platforms;android-33" || true
-            sdkmanager --list
 
-      # Шаг 4: Сборка APK
+      # Шаг 4: Проверка окружения
+      - run:
+          name: Check Android SDK and Buildozer Setup
+          command: |
+            export ANDROID_SDK_ROOT=$HOME/android-sdk
+            buildozer -v check
+            ls -l $ANDROID_SDK_ROOT
+
+      # Шаг 5: Сборка APK
       - run:
           name: Build APK
           command: |
             export ANDROID_SDK_ROOT=$HOME/android-sdk
             buildozer -v android debug
 
-      # Шаг 5: Сохранение APK в артефакты
+      # Шаг 6: Отладка логов сборки
+      - run:
+          name: Debug Buildozer Logs
+          command: |
+            tail -n 50 .buildozer/android/platform/build.log || echo "No build log found"
+
+      # Шаг 7: Сохранение APK в артефакты
       - store_artifacts:
           path: bin/
           destination: apk-files
