@@ -5,19 +5,26 @@ jobs:
     docker:
       - image: circleci/python:3.9
     steps:
-      # Шаг 1: Клонирование репозитория
       - checkout
-      
-      # Шаг 2: Установка Buildozer и зависимостей
       - run:
           name: Install Buildozer and dependencies
           command: |
             sudo apt-get update
-            sudo apt-get install -y git zip unzip openjdk-11-jdk
+            sudo apt-get install -y git zip unzip openjdk-11-jdk curl
             pip install --upgrade pip
             pip install buildozer cython==0.29.36
-            
-      # Шаг 3: Установка Android SDK Build-Tools
+            export PATH=$HOME/.local/bin:$PATH
+
+      - run:
+          name: Install Android Command Line Tools
+          command: |
+            mkdir -p $HOME/android/cmdline-tools
+            curl -o commandlinetools.zip https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+            unzip commandlinetools.zip -d $HOME/android/cmdline-tools
+            mv $HOME/android/cmdline-tools/cmdline-tools $HOME/android/cmdline-tools/latest
+            export PATH=$HOME/android/cmdline-tools/latest/bin:$PATH
+            yes | sdkmanager --licenses
+
       - run:
           name: Install Android SDK Build-Tools
           command: |
@@ -27,13 +34,19 @@ jobs:
               "build-tools;33.0.0" \
               "platforms;android-33"
 
-      # Шаг 4: Сборка APK
       - run:
           name: Build APK
           command: |
             buildozer -v android debug
 
-      # Шаг 5: Сохранение APK в артефакты
+      - run:
+          name: Check bin directory
+          command: |
+            if [ ! -d "bin/" ]; then
+              echo "Directory bin/ does not exist. Check Buildozer logs for errors."
+              exit 1
+            fi
+
       - store_artifacts:
           path: bin/
           destination: apk-files
