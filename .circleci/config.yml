@@ -3,12 +3,12 @@ version: 2.1
 jobs:
   build:
     docker:
-      - image: circleci/python:3.9  # Используем окружение с Python 3.9
+      - image: circleci/python:3.9
     steps:
       # Шаг 1: Клонирование репозитория
       - checkout
       
-      # Шаг 2: Установка Buildozer и необходимых инструментов
+      # Шаг 2: Установка Buildozer и зависимостей
       - run:
           name: Install Buildozer and dependencies
           command: |
@@ -17,13 +17,23 @@ jobs:
             pip install --upgrade pip
             pip install buildozer cython==0.29.36
             
-      # Шаг 3: Сборка APK
+      # Шаг 3: Установка Android SDK Build-Tools
+      - run:
+          name: Install Android SDK Build-Tools
+          command: |
+            mkdir -p $HOME/.buildozer/android/platform/android-sdk
+            yes | sdkmanager --sdk_root=$HOME/.buildozer/android/platform/android-sdk \
+              "platform-tools" \
+              "build-tools;33.0.0" \
+              "platforms;android-33"
+
+      # Шаг 4: Сборка APK
       - run:
           name: Build APK
           command: |
             buildozer -v android debug
 
-      # Шаг 4: Сохранение APK в артефакты CircleCI
+      # Шаг 5: Сохранение APK в артефакты
       - store_artifacts:
           path: bin/
           destination: apk-files
