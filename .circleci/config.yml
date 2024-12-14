@@ -30,23 +30,25 @@ jobs:
             unzip -q cmdline-tools.zip -d $ANDROID_SDK_ROOT/cmdline-tools
             mv $ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools/latest
             export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH
-            yes | sdkmanager --licenses || true
-            yes | sdkmanager --update || true
+            yes | sdkmanager --licenses
+            yes | sdkmanager --update
             yes | sdkmanager --install \
               "platform-tools" \
               "build-tools;33.0.0" \
-              "platforms;android-33" || true
+              "platforms;android-33"
+            sdkmanager --list
 
       # Шаг 4: Отладка Android SDK
       - run:
           name: Debug Android SDK
           command: |
+            export ANDROID_SDK_ROOT=$HOME/android-sdk
             echo "Contents of ANDROID_SDK_ROOT:"
             ls -l $ANDROID_SDK_ROOT
             echo "Installed platforms:"
-            ls -l $ANDROID_SDK_ROOT/platforms
+            ls -l $ANDROID_SDK_ROOT/platforms || echo "No platforms found"
             echo "Installed build-tools:"
-            ls -l $ANDROID_SDK_ROOT/build-tools
+            ls -l $ANDROID_SDK_ROOT/build-tools || echo "No build-tools found"
 
       # Шаг 5: Проверка файла buildozer.spec
       - run:
