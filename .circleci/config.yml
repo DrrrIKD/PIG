@@ -3,17 +3,20 @@ version: 2.1
 jobs:
   build:
     docker:
-      - image: circleci/python:3.9  # Вы можете изменить версию Python при необходимости
+      - image: circleci/python:3.9
     steps:
       # Шаг 1: Клонирование репозитория
       - checkout
 
-      # Шаг 2: Установка зависимостей для Android SDK
+      # Шаг 2: Установка зависимостей
       - run:
           name: Install dependencies
           command: |
             sudo apt-get update
-            sudo apt-get install -y git unzip openjdk-11-jdk curl
+            sudo apt-get install -y git unzip openjdk-11-jdk curl \
+              libssl-dev libffi-dev zlib1g-dev \
+              libncurses5-dev libgdbm-dev libc6-dev \
+              libsqlite3-dev libreadline-dev libbz2-dev
             pip install --upgrade pip
             pip install buildozer cython==0.29.36
 
@@ -34,14 +37,34 @@ jobs:
               "build-tools;33.0.0" \
               "platforms;android-33" || true
 
-      # Шаг 4: Сборка APK
+      # Шаг 4: Отладка Android SDK
+      - run:
+          name: Debug Android SDK
+          command: |
+            echo "Contents of ANDROID_SDK_ROOT:"
+            ls -l $ANDROID_SDK_ROOT
+            echo "Installed platforms:"
+            ls -l $ANDROID_SDK_ROOT/platforms
+            echo "Installed build-tools:"
+            ls -l $ANDROID_SDK_ROOT/build-tools
+
+      # Шаг 5: Проверка файла buildozer.spec
+      - run:
+          name: Check buildozer.spec
+          command: |
+            if [ ! -f buildozer.spec ]; then
+              echo "Error: buildozer.spec not found"
+              exit 1
+            fi
+
+      # Шаг 6: Сборка APK
       - run:
           name: Build APK
           command: |
             export ANDROID_SDK_ROOT=$HOME/android-sdk
             buildozer -v android debug
 
-      # Шаг 5: Сохранение сгенерированного APK в артефакты
+      # Шаг 7: Сохранение APK в артефакты
       - store_artifacts:
           path: bin/
           destination: apk-files
