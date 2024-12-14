@@ -12,7 +12,7 @@ osx.kivy_version = 1.11.1
 android.api = 30
 android.minapi = 21
 android.archs = arm64-v8a,armeabi-v7a
-android.permissions = RECORD_AUDIO,INTERNET
+android.permissions = INTERNET, RECORD_AUDIO, WRITE_EXTERNAL_STORAGE
 
 [buildozer]
 log_level = 2
