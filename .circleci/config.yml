@@ -37,18 +37,13 @@ jobs:
               "build-tools;33.0.0" \
               "platforms;android-33" || true
 
-      # Шаг 4: Проверка окружения и файла buildozer.spec
+      # Шаг 4: Очистка Buildozer и проверка
       - run:
-          name: Check Environment and Buildozer Spec
+          name: Clean Buildozer Cache
           command: |
-            export ANDROID_SDK_ROOT=$HOME/android-sdk
-            ls -l $ANDROID_SDK_ROOT
-            sdkmanager --list || echo "SDK tools not found"
-            if [ -f buildozer.spec ]; then
-              cat buildozer.spec
-            else
-              echo "buildozer.spec not found"
-            fi
+            buildozer appclean
+            rm -rf ~/.buildozer
+            ls -a ~
 
       # Шаг 5: Сборка APK
       - run:
