@@ -4,8 +4,12 @@ jobs:
   build:
     docker:
       - image: circleci/python:3.9
+        resource_class: large  # Увеличение выделяемых ресурсов для сборки
     steps:
+      # Шаг 1: Клонирование репозитория
       - checkout
+
+      # Шаг 2: Установка зависимостей
       - run:
           name: Install Buildozer and dependencies
           command: |
@@ -15,30 +19,37 @@ jobs:
             pip install buildozer cython==0.29.36
             export PATH=$HOME/.local/bin:$PATH
 
+      # Шаг 3: Установка Android Command Line Tools
       - run:
           name: Install Android Command Line Tools
           command: |
             mkdir -p $HOME/android/cmdline-tools
-            curl -o commandlinetools.zip https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
-            unzip commandlinetools.zip -d $HOME/android/cmdline-tools
+            curl --fail --retry 3 -o commandlinetools.zip https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+            unzip -q commandlinetools.zip -d $HOME/android/cmdline-tools
             mv $HOME/android/cmdline-tools/cmdline-tools $HOME/android/cmdline-tools/latest
             export PATH=$HOME/android/cmdline-tools/latest/bin:$PATH
             yes | sdkmanager --licenses
 
+      # Шаг 4: Установка Android SDK Build-Tools
       - run:
           name: Install Android SDK Build-Tools
           command: |
             mkdir -p $HOME/.buildozer/android/platform/android-sdk
-            yes | sdkmanager --sdk_root=$HOME/.buildozer/android/platform/android-sdk \
+            export ANDROID_SDK_ROOT=$HOME/.buildozer/android/platform/android-sdk
+            export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH
+            yes | sdkmanager --sdk_root=$ANDROID_SDK_ROOT \
               "platform-tools" \
               "build-tools;33.0.0" \
               "platforms;android-33"
 
+      # Шаг 5: Сборка APK
       - run:
           name: Build APK
           command: |
+            export PATH=$HOME/.local/bin:$PATH
             buildozer -v android debug
 
+      # Шаг 6: Проверка наличия APK
       - run:
           name: Check bin directory
           command: |
@@ -47,6 +58,7 @@ jobs:
               exit 1
             fi
 
+      # Шаг 7: Сохранение APK в артефакты
       - store_artifacts:
           path: bin/
           destination: apk-files
