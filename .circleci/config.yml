@@ -3,8 +3,10 @@ version: 2.1
 jobs:
   build:
     docker:
-      - image: circleci/python:3.9
-        resource_class: large  # Увеличение выделяемых ресурсов для сборки
+      - image: circleci/python:3.9  # Образ Docker
+        environment:
+          ANDROID_SDK_ROOT: /opt/android-sdk
+    resource_class: large  # Увеличение выделяемых ресурсов
     steps:
       # Шаг 1: Клонирование репозитория
       - checkout
