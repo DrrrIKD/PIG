@@ -27,7 +27,8 @@ jobs:
               git \
               openjdk-11-jdk \
               wget \
-              unzip
+              unzip \
+              expect
             python3 -m pip install --upgrade pip
             python3 -m pip install buildozer
 
@@ -62,8 +63,13 @@ jobs:
       - run:
           name: Build APK
           command: |
-            python3 -m pip install --upgrade buildozer
-            BUILDOZER_ALLOW_ROOT=1 buildozer -v android debug
+            python3 -m pip install --upgrade buildozer expect
+            expect <<EOF
+            spawn buildozer -v android debug
+            expect "Are you sure you want to continue [y/n]?"
+            send "y\r"
+            expect eof
+            EOF
 
       # 5. Сохранение артефактов сборки
       - store_artifacts:
