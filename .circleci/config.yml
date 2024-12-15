@@ -35,5 +35,3 @@ jobs:
           name: Buildozer Build
           command: |
             buildozer -v android debug
-
-      # (Add additional steps for test, deployment as needed)
