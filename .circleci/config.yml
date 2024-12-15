@@ -1,0 +1,26 @@
+version: 2.1
+
+jobs:
+  build-apk:
+    docker:
+      - image: kivy/buildozer  # Используем Docker-образ с Buildozer
+    steps:
+      - checkout
+      - run:
+          name: Установка дополнительных зависимостей
+          command: |
+            apt-get update && apt-get install -y \
+            python3-pip libffi-dev libssl-dev
+      - run:
+          name: Сборка APK
+          command: |
+            buildozer -v android debug
+      - persist_to_workspace:
+          root: .
+          paths:
+            - bin/*.apk
+
+workflows:
+  build-and-deploy:
+    jobs:
+      - build-apk
