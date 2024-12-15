@@ -1,28 +1,28 @@
-version: 2.1  # Required CircleCI version
+version: 2.1
 
 jobs:
-  build-apk:  # Define the build job
+  build-apk:
     docker:
-      - image: kivy/buildozer:latest  # Use the Docker image with Buildozer pre-installed
+      - image: kivy/buildozer:latest  # Buildozer image with dependencies
     steps:
-      - checkout  # Check out your repository
+      - checkout  # Pull the latest code
       - run:
-          name: Install dependencies
+          name: Clean Buildozer
+          command: rm -rf .buildozer
+      - run:
+          name: Install Dependencies
           command: |
-            pip install --upgrade buildozer
-            pip install --upgrade cython
-      - run:
-          name: Clean previous builds
-          command: buildozer android clean
+            pip install --upgrade buildozer cython
+            mkdir -p /opt/android-sdk /opt/android-ndk
       - run:
           name: Build APK
           command: buildozer -v android debug
-      - persist_to_workspace:  # Save artifacts for later use
+      - persist_to_workspace:
           root: .
           paths:
             - bin/
 
 workflows:
-  apk_build:  # Define the workflow
+  apk_build:
     jobs:
       - build-apk
