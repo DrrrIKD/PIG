@@ -38,7 +38,7 @@ jobs:
             wget https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -O tools.zip
             unzip tools.zip && rm tools.zip
             mkdir -p cmdline-tools/latest
-            mv cmdline-tools/* cmdline-tools/latest
+            mv cmdline-tools/* cmdline-tools/latest/ || true
             echo 'export ANDROID_SDK_ROOT=/opt/android-sdk' >> $BASH_ENV
             echo 'export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH' >> $BASH_ENV
             source $BASH_ENV
