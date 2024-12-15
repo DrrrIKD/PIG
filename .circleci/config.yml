@@ -3,17 +3,22 @@ version: 2.1
 jobs:
   build-apk:
     docker:
-      - image: kivy/buildozer:latest  # Buildozer image with dependencies
+      - image: kivy/buildozer:latest
     steps:
-      - checkout  # Pull the latest code
+      - checkout  # Check out your code
       - run:
-          name: Clean Buildozer
-          command: rm -rf .buildozer
+          name: Upgrade pip
+          command: python3 -m pip install --upgrade pip
       - run:
-          name: Install Dependencies
+          name: Install dependencies
           command: |
             pip install --upgrade buildozer cython
-            mkdir -p /opt/android-sdk /opt/android-ndk
+            mkdir -p $HOME/android-sdk $HOME/android-ndk
+            export ANDROID_HOME=$HOME/android-sdk
+            export PATH=$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools:$PATH
+      - run:
+          name: Clean previous builds
+          command: rm -rf .buildozer
       - run:
           name: Build APK
           command: buildozer -v android debug
