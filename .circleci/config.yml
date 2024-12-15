@@ -3,7 +3,7 @@ version: 2.1
 executors:
   android:
     docker:
-      - image: kivy/buildozer:latest  # Официальный образ с Python и Buildozer
+      - image: kivy/buildozer:latest
 
 jobs:
   build-apk:
@@ -11,21 +11,20 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Установка зависимостей
+          name: Обновление Buildozer
           command: |
-            sudo apt-get update && sudo apt-get install -y \
-              openjdk-8-jdk unzip
-            export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+            pip install --upgrade buildozer
+            pip install --upgrade cython
+      - run:
+          name: Очистка Buildozer
+          command: |
             buildozer android clean
+            rm -rf .buildozer
+      - run:
+          name: Сборка APK
+          command: |
             buildozer -v android debug
-      
-      - persist_to_workspace:  # Сохранить APK для использования в других задачах или артефактах
-          root: .
-          paths:
-            - bin/
 
-workflows:
-  version: 2
-  apk-build:
-    jobs:
-      - build-apk
+      - store_artifacts:
+          path: bin/
+          destination: apks
