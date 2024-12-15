@@ -3,7 +3,7 @@ version: 2.1
 jobs:
   build-apk:
     docker:
-      - image: kivy/buildozer
+      - image: kivy/buildozer  # Используем Docker-образ
     steps:
       - checkout
       - run:
@@ -12,12 +12,24 @@ jobs:
             sudo apt-get update && sudo apt-get install -y \
             python3-pip libffi-dev libssl-dev wget unzip
       - run:
-          name: Предварительная загрузка Android SDK и NDK
+          name: Предварительная загрузка Android NDK и SDK
           command: |
             mkdir -p ~/.buildozer/android/platform
+            
+            # Скачивание NDK
             wget https://dl.google.com/android/repository/android-ndk-r25c-linux.zip -O ndk.zip
             unzip ndk.zip -d ~/.buildozer/android/platform
             rm ndk.zip
+            
+            # Скачивание SDK
+            wget https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -O sdk.zip
+            mkdir -p ~/.buildozer/android/platform/android-sdk/cmdline-tools
+            unzip sdk.zip -d ~/.buildozer/android/platform/android-sdk/cmdline-tools
+            rm sdk.zip
+            
+            # Обновление SDK
+            yes | ~/.buildozer/android/platform/android-sdk/cmdline-tools/cmdline-tools/bin/sdkmanager --licenses
+            ~/.buildozer/android/platform/android-sdk/cmdline-tools/cmdline-tools/bin/sdkmanager "platform-tools" "platforms;android-31"
       - run:
           name: Сборка APK
           command: |
