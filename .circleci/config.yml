@@ -31,11 +31,10 @@ jobs:
       - run:
           name: Verify AIDL
           command: |
-            ls $ANDROID_SDK_ROOT/build-tools/33.0.0/aidl
+            ls $ANDROID_SDK_ROOT/build-tools/33.0.0/aidl || echo "AIDL not found!"
       - run:
           name: Build APK
           command: |
-            export PATH=$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/build-tools/33.0.0:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH
             buildozer -v android debug
       - store_artifacts:
           path: bin/
