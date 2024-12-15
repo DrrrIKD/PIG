@@ -24,12 +24,12 @@ jobs:
             # Скачивание SDK
             wget https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -O sdk.zip
             mkdir -p ~/.buildozer/android/platform/android-sdk/cmdline-tools
-            unzip sdk.zip -d ~/.buildozer/android/platform/android-sdk/cmdline-tools
+            unzip sdk.zip -d ~/.buildozer/android/platform/android-sdk/cmdline-tools/latest
             rm sdk.zip
             
             # Установка SDK компонентов
-            yes | ~/.buildozer/android/platform/android-sdk/cmdline-tools/cmdline-tools/bin/sdkmanager --licenses
-            ~/.buildozer/android/platform/android-sdk/cmdline-tools/cmdline-tools/bin/sdkmanager \
+            yes | ~/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
+            ~/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager \
               "platform-tools" \
               "platforms;android-31" \
               "build-tools;31.0.0"
