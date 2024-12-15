@@ -3,7 +3,7 @@ version: 2.1
 jobs:
   build:
     docker:
-      - image: circleci/android:api-33-node
+      - image: circleci/android:api-33
     steps:
       - checkout
 
@@ -53,5 +53,3 @@ jobs:
       - store_artifacts:
           path: bin/
           destination: apk-files
-
-      # (Дополнительно: Кэширование или тестирование может быть добавлено при необходимости)
