@@ -17,7 +17,7 @@ jobs:
             pip install --upgrade pip
             pip install buildozer cython==0.29.36
 
-      # Шаг 3: Установка Android Command Line Tools
+      # Шаг 3: Установка Android SDK
       - run:
           name: Install Android SDK
           command: |
@@ -28,11 +28,11 @@ jobs:
             mv $ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools/latest
             export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH
             { yes || true; } | sdkmanager --licenses
-            yes | sdkmanager --update || true
-            yes | sdkmanager --install \
+            sdkmanager --update
+            sdkmanager --install \
               "platform-tools" \
               "build-tools;36.0.0-rc1" \
-              "platforms;android-33" || true
+              "platforms;android-33"
 
       # Шаг 4: Очистка Buildozer
       - run:
@@ -48,13 +48,7 @@ jobs:
             export ANDROID_SDK_ROOT=$HOME/android-sdk
             buildozer -v android debug
 
-      # Шаг 6: Отладка логов
-      - run:
-          name: Debug Build Logs
-          command: |
-            tail -n 50 .buildozer/android/platform/build.log || echo "No build log found"
-
-      # Шаг 7: Сохранение APK
+      # Шаг 6: Сохранение APK
       - store_artifacts:
           path: bin/
           destination: apk-files
