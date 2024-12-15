@@ -24,6 +24,12 @@ android.api = 33  # Рекомендуется использовать посл
 android.minapi = 23  # Минимальный уровень API, поддерживаемый приложением
 android.ndk = 23b
 android.sdk = 30
+# Путь к установленному Android NDK
+android.ndk_path = ~/.buildozer/android/platform/android-ndk-r25c
+
+# (опционально) Укажите путь к SDK, если нужно
+android.sdk_path = ~/.buildozer/android/platform/android-sdk
+
 android.archs = arm64-v8a, armeabi-v7a  # Архитектуры, поддерживаемые вашим приложением
 android.permissions = INTERNET, RECORD_AUDIO, WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE
 android.add_jars = false  # Укажите false, если не используется дополнительный JAR
