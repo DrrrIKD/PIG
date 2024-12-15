@@ -1,45 +1,39 @@
 version: 2.1
-
 jobs:
-  build-apk:
+  build:
     docker:
-      - image: kivy/buildozer  # Используем Docker-образ
+      - image: circleci/android:api-33-node
     steps:
       - checkout
+      # 1. Install necessary packages for buildozer
       - run:
-          name: Установка дополнительных зависимостей
+          name: Install required dependencies
           command: |
-            sudo apt-get update && sudo apt-get install -y \
-            python3-pip libffi-dev libssl-dev wget unzip
+            sudo apt-get update
+            sudo apt-get install -y python3-pip python3-venv git
+            python3 -m pip install --upgrade pip
+            python3 -m pip install buildozer
+      # 2. Set up Android SDK root
       - run:
-          name: Предварительная загрузка Android NDK и SDK
+          name: Set ANDROID_SDK_ROOT
           command: |
-            mkdir -p ~/.buildozer/android/platform
-            
-            # Скачивание NDK
-            wget https://dl.google.com/android/repository/android-ndk-r25c-linux.zip -O ndk.zip
-            unzip ndk.zip -d ~/.buildozer/android/platform
-            rm ndk.zip
-            
-            # Скачивание SDK
-            wget https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -O sdk.zip
-            mkdir -p ~/.buildozer/android/platform/android-sdk/cmdline-tools
-            unzip sdk.zip -d ~/.buildozer/android/platform/android-sdk/cmdline-tools
-            rm sdk.zip
-            
-            # Обновление SDK
-            yes | ~/.buildozer/android/platform/android-sdk/cmdline-tools/cmdline-tools/bin/sdkmanager --licenses
-            ~/.buildozer/android/platform/android-sdk/cmdline-tools/cmdline-tools/bin/sdkmanager "platform-tools" "platforms;android-31"
+            echo 'export ANDROID_SDK_ROOT=/opt/android-sdk' >> $BASH_ENV
+            echo 'export PATH=$PATH:/opt/android-sdk/platform-tools:/opt/android-sdk/tools/bin' >> $BASH_ENV
+      # 3. Accept Android SDK Licenses and install platform tools
       - run:
-          name: Сборка APK
+        name: Accept Android SDK Licenses and install platform tools
+        command: |
+            yes | /opt/android-sdk/tools/bin/sdkmanager --licenses
+            yes | /opt/android-sdk/tools/bin/sdkmanager "platform-tools"
+      # 4. Configure Buildozer
+      - run:
+          name: Configure buildozer to skip gradle wrapper
+          command: |
+            echo "android.gradle_dependencies.use_gradle_wrapper = False" >> buildozer.spec
+      # 5. Buildozer Commands
+      - run:
+          name: Buildozer Build
           command: |
             buildozer -v android debug
-      - persist_to_workspace:
-          root: .
-          paths:
-            - bin/*.apk
 
-workflows:
-  build-and-deploy:
-    jobs:
-      - build-apk
+      # (Add additional steps for test, deployment as needed)
