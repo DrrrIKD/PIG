@@ -3,14 +3,21 @@ version: 2.1
 jobs:
   build-apk:
     docker:
-      - image: kivy/buildozer  # Используем Docker-образ с Buildozer
+      - image: kivy/buildozer
     steps:
       - checkout
       - run:
           name: Установка дополнительных зависимостей
           command: |
             sudo apt-get update && sudo apt-get install -y \
-            python3-pip libffi-dev libssl-dev
+            python3-pip libffi-dev libssl-dev wget unzip
+      - run:
+          name: Предварительная загрузка Android SDK и NDK
+          command: |
+            mkdir -p ~/.buildozer/android/platform
+            wget https://dl.google.com/android/repository/android-ndk-r23b-linux-x86_64.zip -O ndk.zip
+            unzip ndk.zip -d ~/.buildozer/android/platform
+            rm ndk.zip
       - run:
           name: Сборка APK
           command: |
