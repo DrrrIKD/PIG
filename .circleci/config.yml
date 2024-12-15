@@ -3,25 +3,46 @@ version: 2.1
 jobs:
   build-apk:
     docker:
-      - image: kivy/buildozer:latest
+      - image: kivy/buildozer:latest  # Используем официальный Docker-образ Buildozer
     steps:
-      - checkout  # Check out your code
+      - checkout  # Извлечение последнего кода из репозитория
+      
+      # Убедимся, что зависимости обновлены
       - run:
-          name: Upgrade pip
-          command: python3 -m pip install --upgrade pip
+          name: Обновление pip
+          command: python3 -m pip install --upgrade pip setuptools wheel
+      
+      # Установка зависимостей Buildozer
       - run:
-          name: Install dependencies
+          name: Установка Buildozer и Cython
           command: |
             pip install --upgrade buildozer cython
             mkdir -p $HOME/android-sdk $HOME/android-ndk
             export ANDROID_HOME=$HOME/android-sdk
             export PATH=$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools:$PATH
+
+      # Установка Android SDK и зависимостей (aidl и build-tools)
       - run:
-          name: Clean previous builds
+          name: Установка Android SDK и Build Tools
+          command: |
+            wget https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip
+            unzip commandlinetools-linux-8512546_latest.zip -d $HOME/android-sdk
+            export ANDROID_HOME=$HOME/android-sdk
+            export PATH=$ANDROID_HOME/cmdline-tools/bin:$ANDROID_HOME/build-tools:$PATH
+            yes | sdkmanager --licenses
+            sdkmanager "platform-tools" "build-tools;33.0.0" "platforms;android-33"
+      
+      # Очистка предыдущих билдов
+      - run:
+          name: Очистка предыдущих сборок
           command: rm -rf .buildozer
+
+      # Сборка APK
       - run:
-          name: Build APK
+          name: Сборка APK
           command: buildozer -v android debug
+
+      # Сохранение собранного APK
       - persist_to_workspace:
           root: .
           paths:
