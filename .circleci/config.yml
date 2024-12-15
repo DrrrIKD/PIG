@@ -61,7 +61,9 @@ jobs:
       # 4. Сборка APK через Buildozer
       - run:
           name: Build APK
-          command: buildozer --allow-root -v android debug
+          command: |
+            python3 -m pip install --upgrade buildozer
+            BUILDOZER_ALLOW_ROOT=1 buildozer -v android debug
 
       # 5. Сохранение артефактов сборки
       - store_artifacts:
