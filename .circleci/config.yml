@@ -51,11 +51,11 @@ jobs:
             echo 'export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH' >> $BASH_ENV
             source $BASH_ENV
 
-            # Принятие лицензий Android SDK
-            trap '' SIGPIPE  # Игнорировать SIGPIPE
-            yes | sdkmanager --licenses
+            # Игнорирование SIGPIPE и принятие лицензий
+            trap '' SIGPIPE
+            yes | sdkmanager --licenses || true
 
-            # Установка необходимых инструментов и платформ
+            # Установка необходимых инструментов
             sdkmanager --install "platform-tools" "build-tools;33.0.2" "platforms;android-33"
 
       # 4. Сборка APK через Buildozer
