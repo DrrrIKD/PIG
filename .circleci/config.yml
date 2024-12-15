@@ -61,7 +61,7 @@ jobs:
       # 4. Сборка APK через Buildozer
       - run:
           name: Build APK
-          command: buildozer -v android debug
+          command: buildozer --allow-root -v android debug
 
       # 5. Сохранение артефактов сборки
       - store_artifacts:
