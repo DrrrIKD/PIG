@@ -7,16 +7,7 @@ jobs:
     steps:
       - checkout
 
-      # 1. Установка часового пояса
-      - run:
-          name: Configure Timezone
-          command: |
-            export DEBIAN_FRONTEND=noninteractive
-            ln -fs /usr/share/zoneinfo/Etc/UTC /etc/localtime
-            apt-get update && apt-get install -y tzdata
-            dpkg-reconfigure --frontend noninteractive tzdata
-
-      # 2. Установка зависимостей
+      # Установка зависимостей
       - run:
           name: Install Dependencies
           command: |
@@ -32,46 +23,35 @@ jobs:
             python3 -m pip install --upgrade pip
             python3 -m pip install buildozer
 
-      # 3. Установка Android SDK
+      # Установка Android SDK
       - run:
           name: Install Android SDK
           command: |
-            # Создание директории для Android SDK
             mkdir -p /opt/android-sdk && cd /opt/android-sdk
-            
-            # Скачивание и распаковка инструментов командной строки
             wget https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -O tools.zip
             unzip tools.zip && rm tools.zip
-
-            # Перемещение инструментов в нужную структуру каталогов
             mkdir -p cmdline-tools/latest
             mv cmdline-tools/* cmdline-tools/latest/ || true
-
-            # Настройка переменных окружения для Android SDK
             echo 'export ANDROID_SDK_ROOT=/opt/android-sdk' >> $BASH_ENV
             echo 'export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH' >> $BASH_ENV
             source $BASH_ENV
-
-            # Игнорирование SIGPIPE и принятие лицензий
             trap '' SIGPIPE
             yes | sdkmanager --licenses || true
-
-            # Установка необходимых инструментов
             sdkmanager --install "platform-tools" "build-tools;33.0.2" "platforms;android-33"
 
-      # 4. Сборка APK через Buildozer
+      # Сборка APK через Buildozer с автоматическим подтверждением
       - run:
-          name: Build APK
+          name: Build APK with Buildozer
           command: |
             python3 -m pip install --upgrade buildozer expect
-            expect <<EOF
+            expect -c '
             spawn buildozer -v android debug
             expect "Are you sure you want to continue [y/n]?"
             send "y\r"
             expect eof
-            EOF
+            '
 
-      # 5. Сохранение артефактов сборки
+      # Сохранение артефактов сборки
       - store_artifacts:
           path: bin/
           destination: apk-files
