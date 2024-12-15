@@ -27,11 +27,22 @@ jobs:
             sdkmanager --install \
               "platform-tools" \
               "build-tools;33.0.0" \
-              "platforms;android-33"
+              "platforms;android-33" \
+              "cmdline-tools;latest" \
+              "ndk-bundle"
       - run:
-          name: Verify AIDL
+          name: Проверка переменных окружения
           command: |
-            ls $ANDROID_SDK_ROOT/build-tools/33.0.0/aidl || echo "AIDL not found!"
+            echo $ANDROID_SDK_ROOT
+            echo $PATH
+      - run:
+          name: Проверка наличия AIDL
+          command: |
+            ls $ANDROID_SDK_ROOT/build-tools/33.0.0/aidl || echo "AIDL не найден!"
+      - run:
+          name: Проверка команды aidl
+          command: |
+            $ANDROID_SDK_ROOT/build-tools/33.0.0/aidl --version || echo "AIDL не найден!"
       - run:
           name: Build APK
           command: |
