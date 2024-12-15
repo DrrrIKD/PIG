@@ -3,15 +3,24 @@ version: 2.1
 jobs:
   build:
     docker:
-      - image: ubuntu:20.04  # Используем базовый образ Ubuntu
+      - image: ubuntu:20.04
     steps:
-      - checkout  # Проверка кода
+      - checkout
 
-      # 1. Установка зависимостей
+      # 1. Установка часового пояса
+      - run:
+          name: Configure Timezone
+          command: |
+            export DEBIAN_FRONTEND=noninteractive
+            ln -fs /usr/share/zoneinfo/Etc/UTC /etc/localtime
+            apt-get update && apt-get install -y tzdata
+            dpkg-reconfigure --frontend noninteractive tzdata
+
+      # 2. Установка зависимостей
       - run:
           name: Install Dependencies
           command: |
-            apt-get update && apt-get install -y \
+            apt-get install -y \
               python3-pip \
               python3-venv \
               git \
@@ -21,7 +30,7 @@ jobs:
             python3 -m pip install --upgrade pip
             python3 -m pip install buildozer
 
-      # 2. Установка Android SDK вручную
+      # 3. Установка Android SDK
       - run:
           name: Install Android SDK
           command: |
@@ -36,12 +45,12 @@ jobs:
             yes | sdkmanager --licenses
             sdkmanager --install "platform-tools" "build-tools;33.0.2" "platforms;android-33"
 
-      # 3. Сборка APK через Buildozer
+      # 4. Сборка APK через Buildozer
       - run:
           name: Build APK
           command: buildozer -v android debug
 
-      # 4. Сохранение артефактов
+      # 5. Сохранение артефактов
       - store_artifacts:
           path: bin/
           destination: apk-files
